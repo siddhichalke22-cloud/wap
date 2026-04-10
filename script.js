@@ -2,7 +2,6 @@
 const API_KEY = "9a9cfd56";
 const BASE_URL = "https://www.omdbapi.com/";
 
-// DOM
 const searchBtn = document.getElementById("searchBtn");
 const searchInput = document.getElementById("searchInput");
 const moviesContainer = document.getElementById("moviesContainer");
@@ -11,13 +10,11 @@ const yearFilter = document.getElementById("yearFilter");
 const sortOption = document.getElementById("sortOption");
 const toggle = document.getElementById("themeToggle");
 
-// GLOBAL STATE
 let allMovies = [];
 let searchText = "";
 let selectedYear = "";
 let sortType = "";
 
-// 🎬 FETCH MOVIES
 searchBtn.addEventListener("click", () => {
   const query = searchInput.value.trim();
 
@@ -54,21 +51,17 @@ async function fetchMovies(query) {
   }
 }
 
-// 🎯 MAIN FILTER PIPELINE
 function applyFilters() {
   let result = [...allMovies];
 
-  // 🔍 SEARCH
   result = result.filter(movie =>
     movie.Title.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // 🎛️ FILTER
   if (selectedYear !== "") {
     result = result.filter(movie => movie.Year === selectedYear);
   }
 
-  // 🔄 SORT
   if (sortType === "az") {
     result.sort((a, b) => a.Title.localeCompare(b.Title));
   }
@@ -80,7 +73,6 @@ function applyFilters() {
   displayMovies(result);
 }
 
-// 🎬 DISPLAY
 function displayMovies(movies) {
   moviesContainer.innerHTML = "";
 
@@ -106,25 +98,21 @@ function displayMovies(movies) {
   });
 }
 
-// 🔍 SEARCH INPUT
 searchInput.addEventListener("input", () => {
   searchText = searchInput.value;
   applyFilters();
 });
 
-// 🎛️ FILTER
 yearFilter.addEventListener("change", () => {
   selectedYear = yearFilter.value;
   applyFilters();
 });
 
-// 🔄 SORT
 sortOption.addEventListener("change", () => {
   sortType = sortOption.value;
   applyFilters();
 });
 
-// ⭐ WATCHLIST
 let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
 
 function addToWatchlist(id) {
@@ -137,9 +125,61 @@ function addToWatchlist(id) {
   }
 }
 
-// 🌗 THEME TOGGLE
-toggle.addEventListener("click", () => {
+const toggleBtn = document.getElementById("themeToggle");
+
+toggleBtn.addEventListener("click", () => {
   document.body.classList.toggle("light-mode");
 });
 
 
+const movieCard = `
+  <div class="movie-card">
+    <img src="${movie.Poster}" alt="${movie.Title}" />
+
+    <div class="rating-badge">⭐ ${movie.imdbRating || "N/A"}</div>
+
+    <div class="play-btn">▶</div>
+
+    <div class="movie-info">
+      <h4>${movie.Title}</h4>
+      <p>${movie.Year}</p>
+    </div>
+  </div>
+`;
+const loader = document.getElementById("loader");
+
+function showLoader() {
+  loader.style.display = "block";
+}
+
+function hideLoader() {
+  loader.style.display = "none";
+}
+const moviesContainer1 = document.getElementById("moviesContainer");
+
+async function loadMovies() {
+  const res = await fetch("https://www.omdbapi.com/?s=batman&apikey=9a9cfd56");
+  const data = await res.json();
+
+  showMovies(data.Search);
+}
+
+function showMovies(movies) {
+  moviesContainer.innerHTML = "";
+
+  movies.forEach(movie => {
+    const movieCard = `
+      <div class="movie-card">
+        <img src="${movie.Poster}" alt="${movie.Title}" />
+
+        <div class="movie-info">
+          <h4>${movie.Title}</h4>
+          <p>${movie.Year}</p>
+        </div>
+      </div>
+    `;
+
+    moviesContainer.innerHTML += movieCard;
+  });
+}
+loadMovies();
